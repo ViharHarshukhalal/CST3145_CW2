@@ -39,7 +39,7 @@ app.param('collectionName', function(req, res, next, collectionName) {
 app.get("/", function(req, res, next) {
   // console.log("Entering in Z");
   console.log(`[${new Date().toLocaleString()}] ${req.method} ${req.url}`);
-  res.end("Hello, world!");
+  // res.end("Hello, world!");
   //next();
 });
 
@@ -63,6 +63,49 @@ app.post('/collections/:collectionName', function(req, res, next) {
       res.send(result);
   });
 });
+app.put('/collections/:collectionName/:lessonId', function(req, res, next) {
+  const lessonId = req.params.lessonId;
+  const updatedSpaces = req.body.spaces;
+
+  // Convert lessonId to MongoDB ObjectId if necessary
+  // const query = { _id: lessonId.length === 24 ? new ObjectId(lessonId) : lessonId };
+  let objectId;
+  try {
+      objectId = new ObjectId(lessonId);
+  } catch (e) {
+      return res.status(500).send({ error: 'Invalid lesson ID' });
+  }
+  const query = { _id: objectId };
+
+
+  req.collection.updateOne(query, { $set: { spaces: updatedSpaces } }, { multi: false }, function(err, result) {
+      if (err) {
+          return next(err);
+      }
+      res.send(result);
+  });
+});
+
+app.get('/search', function(req, res, next) {
+  const searchQuery = req.query.q; // Get search query from URL query parameter
+
+  if (!searchQuery) {
+      return res.status(400).send({ error: 'Search query is required' });
+  }
+
+  // Explicitly reference the 'lessons' collection
+  const lessonsCollection = db.collection('lessons');
+
+  lessonsCollection.find({ $text: { $search: searchQuery } }).toArray(function(err, results) {
+      if (err) {
+          return next(err);
+      }
+      console.log('Search results:', results);
+      res.send(results);
+  });
+});
+
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
