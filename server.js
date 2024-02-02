@@ -63,19 +63,19 @@ app.post('/collections/:collectionName', function(req, res, next) {
       res.send(result);
   });
 });
-app.put('/collections/:collectionName/:lessonId', function(req, res, next) {
+app.put('/collections/:collectionName/:_id', function(req, res, next) {
   const lessonId = req.params.lessonId;
   const updatedSpaces = req.body.spaces;
 
-  // Convert lessonId to MongoDB ObjectId if necessary
-  // const query = { _id: lessonId.length === 24 ? new ObjectId(lessonId) : lessonId };
-  let objectId;
-  try {
-      objectId = new ObjectId(lessonId);
-  } catch (e) {
-      return res.status(500).send({ error: 'Invalid lesson ID' });
-  }
-  const query = { _id: objectId };
+//   Convert lessonId to MongoDB ObjectId if necessary
+  const query = { _id: lessonId.length === 24 ? new ObjectId(lessonId) : lessonId };
+//   let objectId;
+//   try {
+//       objectId = new ObjectId(lessonId);
+//   } catch (e) {
+//       return res.status(500).send({ error: 'Invalid lesson ID' });
+//   }
+//   const query = { _id: objectId };
 
 
   req.collection.updateOne(query, { $set: { spaces: updatedSpaces } }, { multi: false }, function(err, result) {
