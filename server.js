@@ -63,12 +63,12 @@ app.post('/collections/:collectionName', function(req, res, next) {
       res.send(result);
   });
 });
-app.put('/collections/:collectionName/:_id', function(req, res, next) {
-  const lessonId = req.params.lessonId;
+app.put('/collections/:collectionName/:id', function(req, res, next) {
+  const lessonId = req.params.id;
   const updatedSpaces = req.body.spaces;
 
 //   Convert lessonId to MongoDB ObjectId if necessary
-  const query = { _id: lessonId.length === 24 ? new ObjectId(lessonId) : lessonId };
+  const query = { _id: id.length === 24 ? new ObjectId(id) : id };
 //   let objectId;
 //   try {
 //       objectId = new ObjectId(lessonId);
@@ -78,7 +78,7 @@ app.put('/collections/:collectionName/:_id', function(req, res, next) {
 //   const query = { _id: objectId };
 
 
-  req.collection.updateOne(query, { $set: { spaces: updatedSpaces } }, { multi: false }, function(err, result) {
+  req.collection.updateOne(query, { $set: { spaces: updatedSpaces } }, function(err, result){
       if (err) {
           return next(err);
       }
@@ -93,7 +93,6 @@ app.get('/search', function(req, res, next) {
       return res.status(400).send({ error: 'Search query is required' });
   }
 
-  // Explicitly reference the 'lessons' collection
   const lessonsCollection = db.collection('lessons');
 
   lessonsCollection.find({ $text: { $search: searchQuery } }).toArray(function(err, results) {
